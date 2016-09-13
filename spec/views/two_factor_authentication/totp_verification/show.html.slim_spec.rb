@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe 'devise/two_factor_authentication/confirm_totp.html.slim' do
+describe 'two_factor_authentication/totp_verification/show.html.slim' do
   let(:user) { build_stubbed(:user, :signed_up, otp_secret_key: 123) }
 
   it 'prompts to enter code from app' do
