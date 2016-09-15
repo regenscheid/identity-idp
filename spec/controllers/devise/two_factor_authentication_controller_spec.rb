@@ -92,7 +92,7 @@ describe Devise::TwoFactorAuthenticationController, devise: true do
           with(subject.current_user.direct_otp, subject.current_user.phone)
         expect(subject.current_user.direct_otp).not_to eq(@old_otp)
         expect(subject.current_user.direct_otp).not_to be_nil
-        expect(response).to redirect_to login_two_factor_sms_path
+        expect(response).to redirect_to login_two_factor_path(delivery_method: 'sms')
       end
 
       it 'tracks the events' do
@@ -129,7 +129,7 @@ describe Devise::TwoFactorAuthenticationController, devise: true do
           with(subject.current_user.direct_otp, subject.current_user.phone)
         expect(subject.current_user.direct_otp).not_to eq(@old_otp)
         expect(subject.current_user.direct_otp).not_to be_nil
-        expect(response).to redirect_to login_two_factor_voice_path
+        expect(response).to redirect_to login_two_factor_path(delivery_method: 'voice')
       end
 
       it 'tracks the event' do

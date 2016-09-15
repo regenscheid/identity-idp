@@ -33,7 +33,7 @@ module Devise
       send_user_otp(method)
 
       flash[:success] = t("notices.send_code.#{method}")
-      redirect_to send(:"login_two_factor_#{method}_path")
+      redirect_to login_two_factor_path(delivery_method: method)
     end
 
     def send_user_otp(method)

@@ -19,7 +19,7 @@ describe 'user edits their account', email: true do
     get_via_redirect otp_send_path(otp_delivery_selection_form: { otp_method: 'sms' })
     if user.reload.direct_otp
       post_via_redirect(
-        login_two_factor_sms_path,
+        login_two_factor_path(delivery_method: 'sms'),
         'code' => user.direct_otp
       )
     end
@@ -78,7 +78,7 @@ describe 'user edits their account', email: true do
     end
 
     it 'does not change the current number if incorrect code is entered' do
-      post_via_redirect login_two_factor_sms_path, 'code' => '12345678'
+      post_via_redirect login_two_factor_path(delivery_method: 'sms'), 'code' => '12345678'
 
       expect(user.reload.phone).to_not eq '+1 (555) 555-5555'
     end

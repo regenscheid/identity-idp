@@ -10,7 +10,7 @@ describe TwoFactorAuthentication::OtpVerificationController, devise: true do
       context 'when FeatureManagement.prefill_otp_codes? is true' do
         it 'sets @code_value to correct OTP value' do
           allow(FeatureManagement).to receive(:prefill_otp_codes?).and_return(true)
-          get :show
+          get :show, delivery_method: 'sms'
 
           expect(assigns(:code_value)).to eq(subject.current_user.direct_otp)
         end
@@ -19,7 +19,7 @@ describe TwoFactorAuthentication::OtpVerificationController, devise: true do
       context 'when FeatureManagement.prefill_otp_codes? is false' do
         it 'does not set @code_value' do
           allow(FeatureManagement).to receive(:prefill_otp_codes?).and_return(false)
-          get :show
+          get :show, delivery_method: 'sms'
 
           expect(assigns(:code_value)).to be_nil
         end
@@ -37,7 +37,7 @@ describe TwoFactorAuthentication::OtpVerificationController, devise: true do
 
         expect(subject.current_user.reload.second_factor_attempts_count).to eq 0
         expect(subject.current_user).to receive(:authenticate_direct_otp).and_return(false)
-        post :create, code: '12345'
+        post :create, code: '12345', delivery_method: 'sms'
       end
 
       it 'increments second_factor_attempts_count' do
@@ -63,7 +63,7 @@ describe TwoFactorAuthentication::OtpVerificationController, devise: true do
           with('User entered invalid 2FA code')
         expect(@analytics).to receive(:track_event).with('User reached max 2FA attempts')
 
-        3.times { post :create, code: '12345' }
+        3.times { post :create, code: '12345', delivery_method: 'sms' }
       end
     end
 
@@ -75,14 +75,14 @@ describe TwoFactorAuthentication::OtpVerificationController, devise: true do
       end
 
       it 'redirects to the profile' do
-        post :create, code: subject.current_user.reload.direct_otp
+        post :create, code: subject.current_user.reload.direct_otp, delivery_method: 'sms'
 
         expect(response).to redirect_to profile_path
       end
 
       it 'resets the second_factor_attempts_count' do
         subject.current_user.update(second_factor_attempts_count: 1)
-        post :create, code: subject.current_user.reload.direct_otp
+        post :create, code: subject.current_user.reload.direct_otp, delivery_method: 'sms'
 
         expect(subject.current_user.reload.second_factor_attempts_count).to eq 0
       end
@@ -92,7 +92,7 @@ describe TwoFactorAuthentication::OtpVerificationController, devise: true do
         expect(@analytics).to receive(:track_event).with('User 2FA successful')
         expect(@analytics).to receive(:track_event).with('Authentication Successful')
 
-        post :create, code: subject.current_user.reload.direct_otp
+        post :create, code: subject.current_user.reload.direct_otp, delivery_method: 'sms'
       end
     end
 
@@ -103,7 +103,7 @@ describe TwoFactorAuthentication::OtpVerificationController, devise: true do
 
         expect(SmsSenderNumberChangeJob).to_not receive(:perform_later).with(user)
 
-        post :create, code: user.direct_otp
+        post :create, code: user.direct_otp, delivery_method: 'sms'
       end
     end
 
@@ -118,7 +118,7 @@ describe TwoFactorAuthentication::OtpVerificationController, devise: true do
 
       describe 'when user submits an invalid OTP' do
         before do
-          post :create, code: '12345'
+          post :create, code: '12345', delivery_method: 'sms'
         end
 
         it 'resets attempts count' do
@@ -132,7 +132,7 @@ describe TwoFactorAuthentication::OtpVerificationController, devise: true do
 
       describe 'when user submits a valid OTP' do
         before do
-          post :create, code: subject.current_user.direct_otp
+          post :create, code: subject.current_user.direct_otp, delivery_method: 'sms'
         end
 
         it 'resets attempts count' do

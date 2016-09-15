@@ -34,13 +34,14 @@ Rails.application.routes.draw do
     get '/otp/send' => 'devise/two_factor_authentication#send_code'
     get '/login/two-factor/authenticator' => 'two_factor_authentication/totp_verification#show'
     post '/login/two-factor/authenticator' => 'two_factor_authentication/totp_verification#create'
-    get '/login/two-factor/sms' => 'two_factor_authentication/otp_verification#show'
+    get(
+      '/login/two-factor/:delivery_method' => 'two_factor_authentication/otp_verification#show',
+      as: :login_two_factor
+    )
     post(
-      '/login/two-factor/sms' => 'two_factor_authentication/otp_verification#create',
+      '/login/two-factor/:delivery_method' => 'two_factor_authentication/otp_verification#create',
       as: :login_otp
     )
-    get '/login/two-factor/voice' => 'two_factor_authentication/otp_verification#show'
-    post '/login/two-factor/voice' => 'two_factor_authentication/otp_verification#create'
   end
 
   unless Figaro.env.domain_name.include?('superb.legit.domain.gov')
