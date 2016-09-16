@@ -157,4 +157,12 @@ feature 'Sign in' do
       expect((frequency + warning) % 60).to eq 0
     end
   end
+
+  describe 'with totp' do
+    it 'allows OTP delivery with SMS' do
+      user = create(:user, :totp_enabled)
+      signin(user.email, user.password)
+      expect{ click_link 'receive a code via SMS' }.to_not raise_error
+    end
+  end
 end

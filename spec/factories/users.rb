@@ -27,5 +27,10 @@ FactoryGirl.define do
       confirmed_at nil
       password nil
     end
+
+    trait :totp_enabled do
+      signed_up
+      otp_secret_key ROTP::Base32.random_base32
+    end
   end
 end
