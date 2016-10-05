@@ -1,16 +1,14 @@
 function ping() {
+  var request = new XMLHttpRequest();
+  request.open('GET', '/active', true);
+  request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
   var el = document.getElementById('session-timeout-msg'),
       cntnr = document.getElementById('session-timeout-cntnr');
-
   var warning_info = "<%= j render('session_timeout/warning') %>";
   cntnr.insertAdjacentHTML('afterbegin', warning_info);
   var warningInterval = parseInt("<%= warning %>");
   startTimer(warningInterval);
-
-
-  var request = new XMLHttpRequest();
-  request.open('GET', '/active', true);
-  request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
   request.onload = function() {
     if (request.status >= 200 && request.status < 400) {
@@ -22,33 +20,21 @@ function ping() {
   setTimeout(ping, (<%= frequency %> * 1000));
 }
 
-function startTimer(duration) {
-  var timer = duration, minutes, seconds;
-  setInterval(function () {
-    minutes = parseInt(timer / 60, 10);
-    seconds = parseInt(timer % 60, 10);
-
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    seconds = seconds < 10 ? "0" + seconds : seconds;
-
-    var timeString = minutes + " minutes and " + seconds + " seconds";
-    document.getElementById("demo").innerHTML = timeString
-
-    if (--timer < 0) {
-      timer = duration;
-    }
-  }, 1000);
-}
-
 function success(data) {
   var el = document.getElementById('session-timeout-msg'),
       cntnr = document.getElementById('session-timeout-cntnr');
-
   var time_timeout = new Date(data.timeout).getTime(),
       time_cutoff = new Date().getTime() + <%= warning %> * 1000,
       show_warning = time_timeout < time_cutoff;
 
-  if (show_warning & !el) cntnr.insertAdjacentHTML('afterbegin', warning_info);
+  var warning_info = "<%= j render('session_timeout/warning') %>";
+
+  if (show_warning & !el) {
+    cntnr.insertAdjacentHTML('afterbegin', warning_info);
+    var warningInterval = parseInt("<%= warning %>");
+    startTimer(warningInterval);
+  }
+
   if (!show_warning & el) el.remove();
   if (data.live == false) {
     window.onbeforeunload = null;
@@ -57,5 +43,27 @@ function success(data) {
   }
 }
 
+function startTimer(duration) {
+  var start = Date.now(),
+      diff,
+      minutes,
+      seconds;
+
+  function timer() {
+    diff = duration - (((Date.now() - start) / 1000) | 0);
+    minutes = (diff / 60) | 0;
+    seconds = (diff % 60) | 0;
+
+    var timeString = minutes + " minutes and " + seconds + " seconds";
+    document.getElementById("demo").innerHTML = timeString
+
+    if (diff <= 0) {
+      start = Date.now() + 1000;
+    }
+  };
+
+  timer();
+  setInterval(timer, 1000);
+}
 
 setTimeout(ping, (<%= start %> * 1000));
