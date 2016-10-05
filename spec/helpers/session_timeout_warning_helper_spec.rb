@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe SessionTimeoutWarningHelper do
   describe '#time_left_in_session' do
-    it 'describes time left' do
+    it 'returns time left before timeout' do
       Timecop.freeze do
         allow(Figaro.env).
           to receive(:session_check_frequency).and_return(1.minute)

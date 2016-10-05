@@ -1,4 +1,13 @@
 function ping() {
+  var el = document.getElementById('session-timeout-msg'),
+      cntnr = document.getElementById('session-timeout-cntnr');
+
+  var warning_info = "<%= j render('session_timeout/warning') %>";
+  cntnr.insertAdjacentHTML('afterbegin', warning_info);
+  var warningInterval = parseInt("<%= warning %>");
+  startTimer(warningInterval);
+
+
   var request = new XMLHttpRequest();
   request.open('GET', '/active', true);
   request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -13,6 +22,23 @@ function ping() {
   setTimeout(ping, (<%= frequency %> * 1000));
 }
 
+function startTimer(duration) {
+  var timer = duration, minutes, seconds;
+  setInterval(function () {
+    minutes = parseInt(timer / 60, 10);
+    seconds = parseInt(timer % 60, 10);
+
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+    var timeString = minutes + " minutes and " + seconds + " seconds";
+    document.getElementById("demo").innerHTML = timeString
+
+    if (--timer < 0) {
+      timer = duration;
+    }
+  }, 1000);
+}
 
 function success(data) {
   var el = document.getElementById('session-timeout-msg'),
@@ -21,8 +47,6 @@ function success(data) {
   var time_timeout = new Date(data.timeout).getTime(),
       time_cutoff = new Date().getTime() + <%= warning %> * 1000,
       show_warning = time_timeout < time_cutoff;
-
-  var warning_info = "<%= j render('session_timeout/warning') %>";
 
   if (show_warning & !el) cntnr.insertAdjacentHTML('afterbegin', warning_info);
   if (!show_warning & el) el.remove();
