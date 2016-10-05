@@ -1,3 +1,5 @@
+require File.expand_path('../../../lib/figaro_yaml_parser', __FILE__)
+
 Figaro.require_keys(
   'allow_third_party_auth',
   'domain_name',
