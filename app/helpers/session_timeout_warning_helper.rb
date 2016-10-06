@@ -4,8 +4,7 @@ module SessionTimeoutWarningHelper
   end
 
   def start
-   1
-    # (Figaro.env.session_check_delay || 30).to_i
+    (Figaro.env.session_check_delay || 30).to_i
   end
 
   def warning

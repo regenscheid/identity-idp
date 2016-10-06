@@ -3,13 +3,6 @@ function ping() {
   request.open('GET', '/active', true);
   request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-  var el = document.getElementById('session-timeout-msg'),
-      cntnr = document.getElementById('session-timeout-cntnr');
-  var warning_info = "<%= j render('session_timeout/warning') %>";
-  cntnr.insertAdjacentHTML('afterbegin', warning_info);
-  var warningInterval = parseInt("<%= warning %>");
-  startTimer(warningInterval);
-
   request.onload = function() {
     if (request.status >= 200 && request.status < 400) {
       success(JSON.parse(request.responseText));
@@ -44,26 +37,19 @@ function success(data) {
 }
 
 function startTimer(duration) {
-  var start = Date.now(),
-      diff,
-      minutes,
-      seconds;
+  var timer = duration, minutes, seconds;
 
-  function timer() {
-    diff = duration - (((Date.now() - start) / 1000) | 0);
-    minutes = (diff / 60) | 0;
-    seconds = (diff % 60) | 0;
+  setInterval(function () {
+    minutes = parseInt(timer / 60, 10);
+    seconds = parseInt(timer % 60, 10);
 
     var timeString = minutes + " minutes and " + seconds + " seconds";
     document.getElementById("demo").innerHTML = timeString
 
-    if (diff <= 0) {
-      start = Date.now() + 1000;
+    if (--timer < 0) {
+      timer = duration;
     }
-  };
-
-  timer();
-  setInterval(timer, 1000);
+  }, 1000);
 }
 
-setTimeout(ping, (<%= start %> * 1000));
+setTimeout(ping, (<%= start %> * 1000))
