@@ -82,14 +82,10 @@ feature 'Sign in' do
     end
 
     scenario 'user sees warning before session times out' do
-      def warning_content
-        t('session_timeout_warning', time_left_in_session: time_left_in_session)
-      end
-
       sign_in_and_2fa_user
       visit root_path
 
-      expect(page).to have_css('#session-timeout-msg', text: warning_content)
+      expect(page).to have_css('#session-timeout-msg')
 
       request_headers = page.driver.network_traffic.flat_map(&:headers).uniq
 

@@ -1,3 +1,9 @@
+var frequency = <%= frequency %> * 1000;
+var warning = <%= warning %> * 1000;
+var start = <%= start %> * 1000;
+var warning_info = "<%= j render('session_timeout/warning') %>";
+
+
 function ping() {
   var request = new XMLHttpRequest();
   request.open('GET', '/active', true);
@@ -10,7 +16,7 @@ function ping() {
   };
 
   request.send();
-  setTimeout(ping, (<%= frequency %> * 1000));
+  setTimeout(ping, frequency);
 }
 
 
@@ -19,12 +25,13 @@ function success(data) {
       cntnr = document.getElementById('session-timeout-cntnr');
 
   var time_timeout = new Date(data.timeout).getTime(),
-      time_cutoff = new Date().getTime() + <%= warning %> * 1000,
+      time_cutoff = new Date().getTime() + warning,
       show_warning = time_timeout < time_cutoff;
 
-  var warning_info = "<%= j render('session_timeout/warning') %>";
-
-  if (show_warning & !el) cntnr.insertAdjacentHTML('afterbegin', warning_info);
+  if (show_warning & !el) {
+    cntnr.insertAdjacentHTML('afterbegin', warning_info);
+    initTimer(warning);
+  }
   if (!show_warning & el) el.remove();
   if (data.live == false) {
     window.onbeforeunload = null;
@@ -34,4 +41,30 @@ function success(data) {
 }
 
 
-setTimeout(ping, (<%= start %> * 1000));
+function initTimer(duration) {
+  var ctdn = document.getElementById('ctdn');
+  var time_left = duration;
+  var interval = 1000;
+
+  var format = function(ms) {
+    var s = ms / 1000;
+    var min = parseInt(s / 60, 10);
+    var sec = parseInt(s % 60, 10);
+
+    return (min == 0 ? '' :
+      min + ' minute' + (min !== 1 ? 's' : '') + ' and ') +
+      sec + ' second' + (sec !== 1 ? 's' : '');
+  }
+
+  function tick() {
+    ctdn.innerHTML = format(time_left);
+    if (time_left <= 0) return;
+    time_left -= interval;
+    setTimeout(tick, interval);
+  }
+
+  tick();
+}
+
+
+setTimeout(ping, start);
